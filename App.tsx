@@ -5,7 +5,7 @@ import SettingsModal from './components/SettingsModal';
 import { getBotResponse } from './services/geminiService';
 import { ChatMessage, Sender, Sentiment } from './types';
 
-const MESSAGE_RECEIVED_SOUND_URL = 'https://cdn.pixabay.com/download/audio/2022/03/15/audio_2c3d56998b.mp3';
+const MESSAGE_RECEIVED_SOUND_URL = 'https://assets.mixkit.co/sfx/preview/mixkit-software-interface-start-2574.mp3';
 
 const playSound = (src: string) => {
   const audio = new Audio(src);

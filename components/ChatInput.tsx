@@ -50,10 +50,10 @@ declare global {
 
 // Sound effect URLs
 const SOUNDS = {
-  MESSAGE_SENT: 'https://cdn.pixabay.com/download/audio/2022/03/10/audio_c394c0347e.mp3',
-  MIC_ON: 'https://cdn.pixabay.com/download/audio/2021/08/04/audio_51c6c0a0c9.mp3',
-  MIC_OFF: 'https://cdn.pixabay.com/download/audio/2021/08/04/audio_c6d5cfb868.mp3',
-  ERROR: 'https://cdn.pixabay.com/download/audio/2022/03/10/audio_a7e2832148.mp3',
+  MESSAGE_SENT: 'https://assets.mixkit.co/sfx/preview/mixkit-message-sent-notification-112.mp3',
+  MIC_ON: 'https://assets.mixkit.co/sfx/preview/mixkit-interface-hint-notification-911.mp3',
+  MIC_OFF: 'https://assets.mixkit.co/sfx/preview/mixkit-select-click-1109.mp3',
+  ERROR: 'https://assets.mixkit.co/sfx/preview/mixkit-warning-alarm-buzzer-991.mp3',
 };
 
 const playSound = (src: string) => {

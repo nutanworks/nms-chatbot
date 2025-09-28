@@ -12,15 +12,15 @@ const SentimentIndicator: React.FC<{ sentiment?: Sentiment }> = ({ sentiment }) 
   if (!sentiment || sentiment === Sentiment.Unknown) return null;
 
   const sentimentMap = {
-    [Sentiment.Positive]: { emoji: '😊', color: 'text-emerald-200', text: 'Positive' },
-    [Sentiment.Negative]: { emoji: '😠', color: 'text-rose-200', text: 'Negative' },
-    [Sentiment.Neutral]: { emoji: '😐', color: 'text-amber-200', text: 'Neutral' },
+    [Sentiment.Positive]: { emoji: '😊', text: 'Positive' },
+    [Sentiment.Negative]: { emoji: '😠', text: 'Negative' },
+    [Sentiment.Neutral]: { emoji: '😐', text: 'Neutral' },
   };
 
-  const { emoji, color, text } = sentimentMap[sentiment];
+  const { emoji, text } = sentimentMap[sentiment];
 
   return (
-    <div className={`flex items-center space-x-1 text-xs mt-1.5 opacity-90 ${color}`}>
+    <div className="flex items-center space-x-1 text-xs mt-1.5 text-white/80">
       <span>{emoji}</span>
       <span>{text}</span>
     </div>
@@ -28,7 +28,7 @@ const SentimentIndicator: React.FC<{ sentiment?: Sentiment }> = ({ sentiment }) 
 };
 
 const Avatar: React.FC<{ src: string, alt: string }> = ({ src, alt }) => (
-    <img src={src} alt={alt} className="w-8 h-8 rounded-full shadow-md bg-gray-800" />
+    <img src={src} alt={alt} className="w-8 h-8 rounded-full shadow-md bg-gray-200 dark:bg-gray-800" />
 );
 
 const Message: React.FC<MessageProps> = ({ message }) => {
@@ -36,12 +36,11 @@ const Message: React.FC<MessageProps> = ({ message }) => {
   const longPressTimerRef = useRef<number | null>(null);
 
   const handleCopyToClipboard = () => {
-    // Prevent re-triggering if the "Copied!" message is already showing
     if (isCopied) return;
     
     navigator.clipboard.writeText(message.text).then(() => {
       setIsCopied(true);
-      setTimeout(() => setIsCopied(false), 1500); // Show "Copied!" for 1.5 seconds
+      setTimeout(() => setIsCopied(false), 1500);
     }).catch(err => {
       console.error('Failed to copy text: ', err);
     });
@@ -54,23 +53,20 @@ const Message: React.FC<MessageProps> = ({ message }) => {
     }
   }
 
-  // Start a timer on mouse down or touch start
   const handlePressStart = () => {
-    clearLongPressTimer(); // Ensure no old timer is running
+    clearLongPressTimer();
     longPressTimerRef.current = window.setTimeout(() => {
         handleCopyToClipboard();
-    }, 700); // 700ms is a common duration for long press
+    }, 700);
   };
 
-  // Clear the timer if the press is released or pointer moves away
   const handlePressEnd = () => {
     clearLongPressTimer();
   };
   
-  // Handle right-click for desktop users
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
-    clearLongPressTimer(); // A right-click shouldn't also trigger a long press
+    clearLongPressTimer();
     handleCopyToClipboard();
   };
 
@@ -79,21 +75,21 @@ const Message: React.FC<MessageProps> = ({ message }) => {
   const getUserBubbleColor = (sentiment?: Sentiment): string => {
     switch (sentiment) {
       case Sentiment.Positive:
-        return 'bg-emerald-600';
+        return 'bg-emerald-500 dark:bg-emerald-600';
       case Sentiment.Negative:
-        return 'bg-rose-600';
+        return 'bg-rose-500 dark:bg-rose-600';
       case Sentiment.Neutral:
-        return 'bg-amber-600';
+        return 'bg-amber-500 dark:bg-amber-600';
       case Sentiment.Unknown:
       default:
-        return 'bg-cyan-600';
+        return 'bg-cyan-500 dark:bg-cyan-600';
     }
   };
 
   const messageContainerClasses = isUser ? 'flex justify-end items-end gap-3' : 'flex justify-start items-end gap-3';
   const messageBubbleClasses = isUser
     ? `${getUserBubbleColor(message.sentiment)} text-white rounded-br-none`
-    : 'bg-gray-700 text-gray-200 rounded-bl-none';
+    : 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-200 rounded-bl-none';
 
   return (
     <div className={messageContainerClasses}>

@@ -50,10 +50,10 @@ declare global {
 
 // Sound effect URLs
 const SOUNDS = {
-  MESSAGE_SENT: 'https://cdn.aistudio.google.com/studio/sounds/message_sent.mp3',
-  MIC_ON: 'https://cdn.aistudio.google.com/studio/sounds/mic_on.mp3',
-  MIC_OFF: 'https://cdn.aistudio.google.com/studio/sounds/mic_off.mp3',
-  ERROR: 'https://cdn.aistudio.google.com/studio/sounds/error.mp3',
+  MESSAGE_SENT: 'https://cdn.pixabay.com/download/audio/2022/03/10/audio_c394c0347e.mp3',
+  MIC_ON: 'https://cdn.pixabay.com/download/audio/2021/08/04/audio_51c6c0a0c9.mp3',
+  MIC_OFF: 'https://cdn.pixabay.com/download/audio/2021/08/04/audio_c6d5cfb868.mp3',
+  ERROR: 'https://cdn.pixabay.com/download/audio/2022/03/10/audio_a7e2832148.mp3',
 };
 
 const playSound = (src: string) => {
@@ -65,6 +65,7 @@ const playSound = (src: string) => {
 interface ChatInputProps {
   onSendMessage: (text: string) => void;
   isLoading: boolean;
+  speechLang: string;
 }
 
 const SendIcon = () => (
@@ -81,41 +82,34 @@ const MicrophoneIcon = () => (
 );
 
 
-const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, isLoading }) => {
+const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, isLoading, speechLang }) => {
   const [text, setText] = useState('');
   const [isListening, setIsListening] = useState(false);
   const [speechError, setSpeechError] = useState<string | null>(null);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const initialTextRef = useRef('');
 
   useEffect(() => {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) {
+    const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognitionAPI) {
       console.warn("Speech recognition not supported in this browser.");
       return;
     }
 
-    const recognition = new SpeechRecognition();
+    const recognition = new SpeechRecognitionAPI();
+    recognitionRef.current = recognition;
+
     recognition.continuous = false;
     recognition.interimResults = true;
-    recognition.lang = 'en-US';
+    recognition.lang = speechLang;
 
     recognition.onresult = (event) => {
-        let interimTranscript = '';
-        let finalTranscript = '';
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-            const transcript = event.results[i][0].transcript;
-            if (event.results[i].isFinal) {
-                finalTranscript += transcript + ' ';
-            } else {
-                interimTranscript += transcript;
-            }
-        }
-        setText(prev => {
-            const parts = prev.split(interimTranscript.trim());
-            const base = finalTranscript ? prev : (parts.length > 1 ? parts[0] : prev);
-            return base + finalTranscript + interimTranscript;
-        });
+      let transcript = '';
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        transcript += event.results[i][0].transcript;
+      }
+      setText(initialTextRef.current + transcript);
     };
 
     recognition.onstart = () => {
@@ -126,6 +120,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, isLoading }) => {
     recognition.onend = () => {
       playSound(SOUNDS.MIC_OFF);
       setIsListening(false);
+      initialTextRef.current = '';
     }
     recognition.onerror = (event) => {
         playSound(SOUNDS.ERROR);
@@ -149,9 +144,12 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, isLoading }) => {
         setTimeout(() => setSpeechError(null), 5000); // Clear error after 5 seconds
         setIsListening(false);
     };
-
-    recognitionRef.current = recognition;
-  }, []);
+    
+    // Cleanup function to stop recognition if component unmounts while listening
+    return () => {
+        recognition.stop();
+    };
+  }, [speechLang]);
 
   const handleMicClick = () => {
     if (!recognitionRef.current) return;
@@ -159,6 +157,8 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, isLoading }) => {
     if (isListening) {
       recognitionRef.current.stop();
     } else {
+      // Capture the initial text *right before* starting
+      initialTextRef.current = text ? text + ' ' : '';
       recognitionRef.current.start();
       textareaRef.current?.focus();
     }
@@ -181,7 +181,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, isLoading }) => {
   };
 
   return (
-    <div className="bg-gray-800 p-4 rounded-lg shadow-inner">
+    <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg shadow-inner transition-colors duration-300">
       <form onSubmit={handleSubmit} className="flex items-center space-x-3">
         <textarea
           ref={textareaRef}
@@ -189,7 +189,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, isLoading }) => {
           onChange={(e) => setText(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Type your message or use the microphone..."
-          className="flex-1 bg-gray-700 text-white rounded-lg p-3 resize-none focus:ring-2 focus:ring-cyan-500 focus:outline-none transition duration-200 disabled:opacity-50"
+          className="flex-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 rounded-lg p-3 resize-none focus:ring-2 focus:ring-cyan-500 focus:outline-none transition duration-200 disabled:opacity-50"
           disabled={isLoading}
           rows={1}
         />
@@ -197,9 +197,9 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, isLoading }) => {
           type="button"
           onClick={handleMicClick}
           disabled={isLoading || !recognitionRef.current}
-          className={`text-white p-3 rounded-full transition duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-cyan-500
-            ${isListening ? 'bg-rose-600 animate-pulse' : 'bg-gray-600 hover:bg-gray-500'}
-            disabled:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-50
+          className={`text-white p-3 rounded-full transition duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 dark:focus:ring-offset-gray-800 focus:ring-cyan-500
+            ${isListening ? 'bg-rose-600 animate-pulse' : 'bg-gray-500 hover:bg-gray-600 dark:bg-gray-600 dark:hover:bg-gray-500'}
+            disabled:bg-gray-300 dark:disabled:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-50
           `}
           aria-label={isListening ? 'Stop listening' : 'Start listening'}
         >
@@ -208,14 +208,14 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, isLoading }) => {
         <button
           type="submit"
           disabled={isLoading || !text.trim()}
-          className="bg-cyan-600 text-white p-3 rounded-full hover:bg-cyan-500 disabled:bg-gray-600 disabled:cursor-not-allowed transition duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-cyan-500"
+          className="bg-cyan-600 text-white p-3 rounded-full hover:bg-cyan-500 disabled:bg-gray-300 dark:disabled:bg-gray-600 disabled:cursor-not-allowed transition duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 dark:focus:ring-offset-gray-800 focus:ring-cyan-500"
           aria-label="Send message"
         >
           <SendIcon />
         </button>
       </form>
       {speechError && (
-        <p className="text-rose-400 text-sm text-center mt-2 animate-pulse">{speechError}</p>
+        <p className="text-rose-600 dark:text-rose-400 text-sm text-center mt-2 animate-pulse">{speechError}</p>
       )}
     </div>
   );

@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef } from 'react';
 import Message from './Message';
 import { ChatMessage } from '../types';
@@ -26,11 +25,11 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ messages, isLoading }) => {
       ))}
       {isLoading && (
         <div className="flex justify-start">
-            <div className="bg-gray-700 rounded-lg p-3 max-w-lg animate-pulse">
+            <div className="bg-gray-200 dark:bg-gray-700 rounded-lg p-3 max-w-lg animate-pulse">
                 <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-                    <div className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-                    <div className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce"></div>
+                    <div className="w-2 h-2 bg-cyan-500 dark:bg-cyan-400 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                    <div className="w-2 h-2 bg-cyan-500 dark:bg-cyan-400 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                    <div className="w-2 h-2 bg-cyan-500 dark:bg-cyan-400 rounded-full animate-bounce"></div>
                 </div>
             </div>
         </div>

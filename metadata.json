@@ -1,0 +1,7 @@
+{
+  "name": "AI Chatbot with Sentiment Analysis",
+  "description": "A multi-channel AI chatbot that leverages Natural Language Processing for intent recognition and sentiment analysis to gauge user mood, providing stateful, multi-turn conversations.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
